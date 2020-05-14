@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ReferenceProject</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <script type="application/javascript" src="js/functions.js"></script>
+</head>
+<body>
+    <div id="main">
+        <form id="postaccount">
+            <label for="username">Username:</label><input type="text" id="username" name="username" /><br>
+            <label for="fullname">Fullname:</label><input type="text" id="fullname" name="fullname" /><br>
+            <label for="address">Address:</label><input type="text" id="address" name="address" /><br>
+            <label for="fileupload">Avatar:</label><input type="file" id="fileupload" /><br><br>
+
+            <input type="button" id="send_json" value="send json" onclick="sendJsonData()"/>
+            <input type="button" id="send_formdata" value="send formdata" onclick="sendFormData()" />
+            <span id="postresponse"></span>
+        </form>
+
+        <br><hr><br>
+
+        <form id="showaccount">
+            <input type="text" placeholder="username" id="usertoload"/>
+            <input type="button" onclick="loadAccount()" value="show account"/>
+            <span id="getresponse"></span>
+        </form>
+
+        <template id="accounttemplate">
+            <div>
+                <label>Username:</label><label class="a_un"></label><br>
+                <label>Fullname:</label><label class="a_fn"></label><br>
+                <label>Address:</label><label class="a_ad"></label><br>
+                <label>Avatar:</label><img class="a_av" src="" height="50px"/><br>
+                <label>Avatar-link:</label><a class="a_al" href="" target="_blank">click</a>
+            </div>
+        </template>
+
+        <div id="accountview"></div>
+    </div>
+</body>
+</html>
