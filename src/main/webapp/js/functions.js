@@ -7,21 +7,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.addEventListener("error", error => reject(error));
 });
 
-async function sendFormData(event) {
-    let element = document.querySelector("#postresponse");
-
-    let file = document.querySelector("#fileupload").files[0];
-    let formData = new FormData(document.querySelector("#postaccount"));
-    formData.append("avatarBase64", (await toBase64(file)));
-
-    let fetchOptions = {
-        method: "POST",
-        body: new URLSearchParams(formData)
-    }
-
-    let response = await fetch("/restservices/accounts", fetchOptions);
-    element.textContent = "Statuscode: " + response.status;
-}
 
 async function sendJsonData(event) {
     let element = document.querySelector("#postresponse");
@@ -50,7 +35,7 @@ async function loadAccount(event) {
 
     let response = await fetch("/restservices/account/" + username);
 
-    if (response.status == 200) {
+    if (response.status === 200) {
         let jsonData = await response.json();
         showAccount(jsonData);
     } else element.textContent = "Statuscode: " + response.status;

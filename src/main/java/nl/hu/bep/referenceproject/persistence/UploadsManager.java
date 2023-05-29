@@ -3,41 +3,21 @@ package nl.hu.bep.referenceproject.persistence;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
-
 public class UploadsManager {
-    private final static String ENDPOINT = "https://bepblobstorage.blob.core.windows.net/";
-    private final static String SASTOKEN = "?sv=2019-10-10&ss=b&srt=co&sp=rwdlacx&se=2020-09-06T03:04:58Z&st=2020-05-06T19:04:58Z&spr=https&sig=SzuMyPuiRCrN9WqnkRZz3u9cl%2BSKTtpaPir3Fx5ANRo%3D";
-    private final static String CONTAINER = "uploadscontainer";
-
-    private static BlobContainerClient blobContainer = new BlobContainerClientBuilder()
-            .endpoint(ENDPOINT)
-            .sasToken(SASTOKEN)
-            .containerName(CONTAINER)
-            .buildClient();
+    private final static String uploadsLocation = "/home/data";
 
     public static EncodedBase64 loadEncodedUploadFromAzure(String uploadId) {
-        if (!blobContainer.exists())
-            throw new IllegalStateException("Container does not exist!");
-
-        BlobClient blob = blobContainer.getBlobClient(uploadId);
-
-        if (!blob.exists())
-            throw new IllegalStateException("Blob does not exist!");
-
-        byte[] bytez = null;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            blob.download(baos);
-            bytez = baos.toByteArray();
+        try {
+            String base64str = Files.readString(Path.of(uploadsLocation, uploadId));
+            return new EncodedBase64(base64str);
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            throw new IllegalStateException("Could not load image!");
         }
-
-        return new EncodedBase64(new String(bytez));
     }
 
     public static DecodedBase64 loadDecodedUploadFromAzure(String uploadId) {
@@ -51,25 +31,18 @@ public class UploadsManager {
     }
 
     public static String saveUploadToAzure(EncodedBase64 upload) {
-        if (!blobContainer.exists())
-            blobContainer.create();
-
         String base64str = upload.getBase64str();
 
         long[] idParts = { System.currentTimeMillis(), Math.abs(base64str.hashCode()) };
         String uniqueId = String.valueOf(idParts[0]).concat(String.valueOf(idParts[1]));
 
-        BlobClient blob = blobContainer.getBlobClient(uniqueId);
-
-        byte[] bytez = base64str.getBytes();
-
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytez)) {
-            blob.upload(bais, bytez.length, true);
-            return uniqueId;
+        try {
+            Files.createDirectories(Path.of(uploadsLocation));
+            Files.writeString(Path.of(uploadsLocation, uniqueId), base64str, StandardOpenOption.CREATE_NEW);
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            uniqueId = null;
         }
 
-        return null;
+        return uniqueId;
     }
 }
